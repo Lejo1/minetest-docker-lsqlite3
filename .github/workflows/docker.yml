@@ -1,0 +1,32 @@
+name: docker
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Branch/tag'
+        required: true
+  schedule:
+    - cron: 0 2 * * 2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Build Image
+        run: docker build --build-arg ref=master -t lejo/minetest-lsqlite3:latest -t lejo/minetest-lsqlite3:master .
+        if: ${{ !github.event.inputs.tag }}
+
+      - name: Build Image
+        run: docker build --build-arg ref=${{ github.event.inputs.tag }} -t lejo/minetest-lsqlite3:${{ github.event.inputs.tag }} .
+        if: ${{ github.event.inputs.tag }}
+
+      - name: Docker login
+        run: docker login -u lejo -p ${{ secrets.DOCKER_KEY }}
+
+      - name: Push Image
+        run: docker push lejo/minetest-lsqlite3
