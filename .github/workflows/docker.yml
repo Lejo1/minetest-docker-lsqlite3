@@ -30,3 +30,8 @@ jobs:
 
       - name: Push Image
         run: docker push lejo/minetest-lsqlite3
+        if: ${{ !github.event.inputs.tag }}
+
+      - name: Push Image
+        run: docker push lejo/minetest-lsqlite3:${{ github.event.inputs.tag }}
+        if: ${{ github.event.inputs.tag }}
